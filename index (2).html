@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎁 Regalo Sorpresa</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(#061826, #0e3b2e);
+    color: white;
+    text-align: center;
+}
+
+/* BLOQUEO */
+#lockScreen {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(#0a1d2e, #123);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+#lockScreen input {
+    padding: 12px;
+    border-radius: 20px;
+    border: none;
+    text-align: center;
+    font-size: 16px;
+}
+
+#lockScreen button {
+    margin-top: 10px;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 20px;
+    background: crimson;
+    color: white;
+}
+
+/* CONTENIDO */
+.container {
+    padding: 10px;
+}
+
+.tree-area {
+    position: relative;
+    width: 90vw;
+    max-width: 320px;
+    height: 430px;
+    margin: auto;
+}
+
+.star {
+    font-size: 42px;
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 5px gold; }
+    to { text-shadow: 0 0 20px gold; }
+}
+
+.tree {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.layer {
+    width: 0;
+    height: 0;
+    margin: auto;
+    border-left: 140px solid transparent;
+    border-right: 140px solid transparent;
+    border-bottom: 120px solid #1f9d55;
+}
+
+.layer.small {
+    border-left-width: 100px;
+    border-right-width: 100px;
+    border-bottom-width: 90px;
+}
+
+.layer.tiny {
+    border-left-width: 70px;
+    border-right-width: 70px;
+    border-bottom-width: 70px;
+}
+
+.trunk {
+    width: 40px;
+    height: 50px;
+    background: #6b3e1e;
+    margin: auto;
+}
+
+.light {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    position: absolute;
+    animation: blink 1.5s infinite alternate;
+}
+
+@keyframes blink {
+    from { opacity: .3; }
+    to { opacity: 1; }
+}
+
+.image-layer img {
+    width: 55px;
+    height: 55px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid gold;
+    position: absolute;
+    touch-action: none;
+}
+
+/* carta */
+textarea {
+    width: 95%;
+    max-width: 400px;
+    height: 120px;
+    border-radius: 14px;
+    border: none;
+    padding: 10px;
+    margin-top: 15px;
+    font-size: 16px;
+}
+
+.preview {
+    background: rgba(255,255,255,0.12);
+    margin: 15px auto;
+    padding: 12px;
+    border-radius: 12px;
+    max-width: 400px;
+}
+
+button {
+    padding: 10px 18px;
+    border-radius: 20px;
+    border: none;
+    background: crimson;
+    color: white;
+    margin: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- PANTALLA SORPRESA -->
+<div id="lockScreen">
+    <h2>🎁 Tienes un regalo</h2>
+    <p>Escribe la contraseña para abrirlo</p>
+    <input id="passwordInput" type="password" placeholder="Contraseña">
+    <button onclick="unlock()">Abrir regalo</button>
+    <p id="error" style="color:pink;"></p>
+</div>
+
+<div class="container" id="mainContent" style="display:none;">
+
+<h1>🎄 Feliz Navidad 🎄</h1>
+
+<div class="tree-area" id="treeArea">
+    <div class="star">⭐</div>
+
+    <div class="tree">
+        <div class="layer tiny"></div>
+        <div class="layer small"></div>
+        <div class="layer"></div>
+        <div class="trunk"></div>
+    </div>
+
+    <div class="image-layer" id="imageLayer"></div>
+</div>
+
+<input type="file" accept="image/*" multiple onchange="addImages(event)">
+
+<h3>💌 Carta</h3>
+<textarea id="letter" placeholder="Escribe aquí tu mensaje..."></textarea>
+
+<div class="preview">
+    <strong>Mensaje guardado:</strong>
+    <p id="previewText"></p>
+</div>
+
+<button onclick="saveMemory()">💾 Guardar recuerdo</button>
+
+</div>
+
+<script>
+// 🔐 CONTRASEÑA (PUEDES CAMBIARLA)
+const PASSWORD = "12/06/2024";
+
+// desbloqueo
+function unlock() {
+    const input = document.getElementById("passwordInput").value;
+    if (input === PASSWORD) {
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+        loadMemory();
+    } else {
+        document.getElementById("error").textContent = "Contraseña incorrecta 🎄";
+    }
+}
+
+// luces
+for (let i = 0; i < 25; i++) {
+    const light = document.createElement("div");
+    light.className = "light";
+    light.style.background = ["red","yellow","cyan","pink","lime"][Math.floor(Math.random()*5)];
+    light.style.left = Math.random() * 280 + "px";
+    light.style.top = Math.random() * 260 + "px";
+    document.getElementById("treeArea").appendChild(light);
+}
+
+// CARTA
+const textarea = document.getElementById("letter");
+const preview = document.getElementById("previewText");
+
+textarea.addEventListener("input", () => {
+    preview.textContent = textarea.value;
+    localStorage.setItem("carta", textarea.value);
+});
+
+// GUARDAR / CARGAR
+function saveMemory() {
+    alert("🎁 Recuerdo guardado con éxito");
+}
+
+function loadMemory() {
+    const savedText = localStorage.getItem("carta");
+    if (savedText) {
+        textarea.value = savedText;
+        preview.textContent = savedText;
+    }
+
+    const imgs = JSON.parse(localStorage.getItem("imagenes") || "[]");
+    imgs.forEach(addImageFromData);
+}
+
+// IMÁGENES
+function addImages(event) {
+    for (let file of event.target.files) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const data = {
+                src: e.target.result,
+                x: Math.random() * 240,
+                y: Math.random() * 240
+            };
+            addImageFromData(data);
+            saveImages();
+        };
+        reader.readAsDataURL(file);
+    }
+
+function addImageFromData(data) {
+    const img = document.createElement("img");
+    img.src = data.src;
+    img.style.left = data.x + "px";
+    img.style.top = data.y + "px";
+
+    enableDrag(img);
+    document.getElementById("imageLayer").appendChild(img);
+}
+
+function saveImages() {
+    const imgs = [...document.querySelectorAll(".image-layer img")].map(img => ({
+        src: img.src,
+        x: parseInt(img.style.left),
+        y: parseInt(img.style.top)
+    }));
+    localStorage.setItem("imagenes", JSON.stringify(imgs));
+}
+
+// mover con dedo o mouse
+function enableDrag(el) {
+    let offsetX = 0, offsetY = 0;
+    let pressTimer;
+
+    const start = e => {
+        const t = e.touches ? e.touches[0] : e;
+        offsetX = t.clientX - el.offsetLeft;
+        offsetY = t.clientY - el.offsetTop;
+
+        // mantener presionado = borrar
+        pressTimer = setTimeout(() => {
+            if (confirm("¿Quieres eliminar esta imagen?")) {
+                el.remove();
+                saveImages();
+            }
+        }, 700);
+
+        document.addEventListener("mousemove", move);
+        document.addEventListener("touchmove", move);
+        document.addEventListener("mouseup", end);
+        document.addEventListener("touchend", end);
+    };
+
+    const move = e => {
+        clearTimeout(pressTimer);
+        const t = e.touches ? e.touches[0] : e;
+        el.style.left = (t.clientX - offsetX) + "px";
+        el.style.top = (t.clientY - offsetY) + "px";
+    };
+
+    const end = () => {
+        clearTimeout(pressTimer);
+        saveImages();
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("touchmove", move);
+    };
+
+    el.addEventListener("mousedown", start);
+    el.addEventListener("touchstart", start);
+}
+
+    const move = e => {
+        const t = e.touches ? e.touches[0] : e;
+        el.style.left = (t.clientX - offsetX) + "px";
+        el.style.top = (t.clientY - offsetY) + "px";
+    };
+
+    const end = () => {
+        saveImages();
+        document.removeEventListener("mousemove", move);
+        document.removeEventListener("touchmove", move);
+    };
+
+    el.addEventListener("mousedown", start);
+    el.addEventListener("touchstart", start);
+}
+</script>
+
+</body>
+</html>
